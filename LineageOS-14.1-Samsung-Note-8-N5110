@@ -39,17 +39,10 @@ cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/lineage-14.1-
 cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/lineage-14.1-*.md5sum $ota_folder_daily
 #cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/recovery.img $ota_folder_daily/recovery-lineageos-unofficial-n5110.img
 
-#webdav mounten und löschen
-mount /var/lib/jenkins/webdav
-cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/lineage-14.1-*.zip $ota_folder_daily_webdav
-cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/lineage-14.1-*.md5sum $ota_folder_daily_webdav
-#cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5110/recovery.img $ota_folder_daily_webdav/recovery-lineageos-unofficial-n5110.img
-fusermount -u /var/lib/jenkins/webdav
-
 
 cd $JENKINS_HOME/workspace/LineageOS-14.1
 
-# lösche out 
+# delete out
 rm out -R
 
 # Restart the JACK server
