@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Patch Kernel for Note 8
+
+#cd $JENKINS_HOME/workspace/LineageOS-14.1/kernel/samsung/smdk4412
+
+#git apply -v $JENKINS_HOME/patches/*.patch
+
+#git apply -v $JENKINS_HOME/patches/note8-enable-conservative-cpu-covernor-for-more-devices.patch
+#git apply -v $JENKINS_HOME/patches/n5120-selinux-permissive.patch
+
+# Patch selinux rule rild.te for Note 8
+
+#cd $JENKINS_HOME/workspace/LineageOS-14.1/device/samsung/kona-common
+
+#git apply -v $JENKINS_HOME/workspace/patches/n5120-Fix-SELinux-preventing-rild-reading-symlink.patch
+
+
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1
+
+# increase jack memory (only if you have less the 12gb RAM
+# export JACK_SERVER_VM_ARGUMENTS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4096m"
+#./prebuilts/sdk/tools/jack-admin kill-server
+#./prebuilts/sdk/tools/jack-admin start-server
+
+
+# Tell the environment not to use NINJA
+# export USE_NINJA=false
+
+export USE_CCACHE=1
+export CCACHE_DIR=$JENKINS_HOME/ccache
+#fix old flex
+export LC_ALL=C
+
+#export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+
+# export WITH_SU=true
+
+. build/envsetup.sh && lunch lineage_n5120-userdebug 
+
+# Patch Kernel for Note 8
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1/kernel/samsung/smdk4412
+
+git apply -v $JENKINS_HOME/patches/n5120-selinux-permissive.patch
+
+time mka bacon
+
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5120/lineage-14.1-*.zip $ota_folder_daily
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5120/lineage-14.1-*.md5sum $ota_folder_daily
+#cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5120/recovery.img $ota_folder_daily/recovery-lineageos-unofficial-n5120.img
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1
+
+# delete out 
+rm out -R
+
+# Restart the JACK server
+./prebuilts/sdk/tools/jack-admin kill-server
+./prebuilts/sdk/tools/jack-admin start-server
