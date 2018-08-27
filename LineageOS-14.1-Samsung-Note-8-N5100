@@ -1,0 +1,57 @@
+#!/bin/bash
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1
+
+# increase jack memory (only if you have less the 12gb RAM
+# export JACK_SERVER_VM_ARGUMENTS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4096m"
+#./prebuilts/sdk/tools/jack-admin kill-server
+#./prebuilts/sdk/tools/jack-admin start-server
+
+
+# Tell the environment not to use NINJA
+# export USE_NINJA=false
+
+export USE_CCACHE=1
+export CCACHE_DIR=$JENKINS_HOME/ccache
+#fix old flex
+export LC_ALL=C
+
+#export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+
+# export WITH_SU=true
+
+. build/envsetup.sh && lunch lineage_n5100-userdebug 
+
+# Patch MTP for Note 8
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1/frameworks/base
+
+#git apply -v $JENKINS_HOME/patches/*.patch
+
+git apply -v $JENKINS_HOME/patches/note-8-nougat-mtp-crash.patch
+
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1
+
+time mka bacon
+
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/lineage-14.1-*.zip $ota_folder_daily
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/lineage-14.1-*.md5sum $ota_folder_daily
+#cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/recovery.img $ota_folder_daily/recovery-lineageos-unofficial-n5100.img
+
+#webdav mounten und löschen
+mount /var/lib/jenkins/webdav
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/lineage-14.1-*.zip $ota_folder_daily_webdav
+cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/lineage-14.1-*.md5sum $ota_folder_daily_webdav
+#cp $JENKINS_HOME/workspace/LineageOS-14.1/out/target/product/n5100/recovery.img $ota_folder_daily_webdav/recovery-lineageos-unofficial-n5100.img
+fusermount -u /var/lib/jenkins/webdav
+
+
+cd $JENKINS_HOME/workspace/LineageOS-14.1
+
+# lösche out 
+rm out -R
+
+# Restart the JACK server
+./prebuilts/sdk/tools/jack-admin kill-server
+./prebuilts/sdk/tools/jack-admin start-server
